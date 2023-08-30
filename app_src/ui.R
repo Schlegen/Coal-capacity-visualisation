@@ -4,7 +4,7 @@ library(shiny)
 fluidPage(
 
     # Application title
-    titlePanel("Coal Power World Capacity per Country"),
+    titlePanel("Coal Power Capacity per Country"),
 
     # Sidebar with a slider input for number of bins
     sidebarLayout(
@@ -14,6 +14,7 @@ fluidPage(
 
         # Show a plot of the generated distribution
         mainPanel(
+          plotOutput("worldPlot"),
           tableOutput("dataDisplay")
         )
     )
