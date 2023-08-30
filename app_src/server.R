@@ -24,16 +24,18 @@ WORLD_DATA["ISO3"] <- ISO_CODES$ISO3[match(WORLD_DATA$region, ISO_CODES$Country)
 function(input, output, session) {
     output$worldPlot <- renderPlot({
       
+      observed_year <- as.numeric(input$year)
+      
       #We first select the plants that operated during the year input$year and then sum them by country
-      year_capacity_data <- PLANT_DATA[(PLANT_DATA$Status == 'operating' & PLANT_DATA$'Start year' <= input$year) 
-                                       | (PLANT_DATA$Status == 'retired' & PLANT_DATA$'Start year' <= input$year & PLANT_DATA$'Retired year' >= input$year),] %>%
+      year_capacity_data <- PLANT_DATA[(PLANT_DATA$Status == 'operating' & PLANT_DATA$'Start year' <= observed_year) 
+                                       | (PLANT_DATA$Status == 'retired' & PLANT_DATA$'Start year' <= observed_year & PLANT_DATA$'Retired year' >= input$year),] %>%
                             group_by(Country)%>% summarise(coal_capacity=sum(`Capacity (MW)`), .groups='drop')
       
       #merging with ISO_CODES data frame to get the right format for plots
       year_capacity_data <- merge(x=ISO_CODES, y=year_capacity_data, by="Country",
                                   all.x = TRUE) %>% select(ISO3, Country, coal_capacity)
 
-      #year_capacity_data <- year_capacity_data[!is.na(plotdf$ISO3), ]
+      year_capacity_data <- year_capacity_data[!is.na(year_capacity_data$ISO3), ]
       
       # World map dataset for plots
       world_data <- WORLD_DATA
@@ -47,13 +49,16 @@ function(input, output, session) {
         scale_fill_gradientn(colours = brewer.pal(5, "RdBu"), na.value = 'white') + 
         scale_y_continuous(limits = c(-60, 90), breaks = c()) + 
         scale_x_continuous(breaks = c())
+
       return(g)
     })
     
     output$dataDisplay <- renderTable({
+      observed_year <- as.numeric(input$year)
+      
       #We plot the selected plants for debug
-      selected_plants <- PLANT_DATA[(PLANT_DATA$Status == 'operating' & PLANT_DATA$'Start year' <= input$year) 
-                                       | (PLANT_DATA$Status == 'retired' & PLANT_DATA$'Start year' <= input$year & PLANT_DATA$'Retired year' >= input$year),] %>%
+      selected_plants <- PLANT_DATA[(PLANT_DATA$Status == 'operating' & PLANT_DATA$'Start year' <= observed_year) 
+                                       | (PLANT_DATA$Status == 'retired' & PLANT_DATA$'Start year' <= observed_year & PLANT_DATA$'Retired year' >= input$year),] %>%
                       select('Country', 'Status', 'Start year', 'Retired year')
       head(selected_plants, 25)
     })
