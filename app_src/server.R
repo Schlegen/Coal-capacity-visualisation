@@ -21,6 +21,19 @@ WORLD_DATA = ggplot2::map_data('world')
 WORLD_DATA <- fortify(WORLD_DATA)
 WORLD_DATA["ISO3"] <- ISO_CODES$ISO3[match(WORLD_DATA$region, ISO_CODES$Country)]
 
+
+plot_theme <- function () { 
+  theme_bw() + theme(axis.text=element_text(size = 14),
+                     axis.title=element_text(size = 14),
+                     strip.text=element_text(size = 14),
+                     panel.grid.major=element_blank(), 
+                     panel.grid.minor=element_blank(),
+                     panel.background=element_blank(), 
+                     legend.position="bottom",
+                     panel.border=element_blank(), 
+                     strip.background=element_rect(fill = 'white', colour = 'white'))
+}
+
 function(input, output, session) {
     output$worldPlot <- renderPlot({
       
@@ -39,8 +52,9 @@ function(input, output, session) {
       
       # World map dataset for plots
       world_data <- WORLD_DATA
-      world_data["coal_capacity"] <- year_capacity_data$coal_capacity[match(WORLD_DATA$"ISO3", year_capacity_data$"ISO3")]#rep(1, nrows=)
-        
+      world_data["coal_capacity"] <- year_capacity_data$coal_capacity[match(WORLD_DATA$"ISO3", year_capacity_data$"ISO3")]
+      
+      
       #world map plot
       g <- ggplot() + 
         geom_polygon_interactive(data=world_data, color='gray70', size=0.1,
@@ -48,8 +62,11 @@ function(input, output, session) {
                                  tooltip = sprintf("%s<br/>%s", ISO3, coal_capacity))) + 
         scale_fill_gradientn(colours = brewer.pal(5, "RdBu"), na.value = 'white') + 
         scale_y_continuous(limits = c(-60, 90), breaks = c()) + 
-        scale_x_continuous(breaks = c())
-
+        scale_x_continuous(breaks = c()) +
+        labs(fill="Coal Power Plant Capacity", color="Coal Power Plant Capacity (MW)", title=NULL, x=NULL, y=NULL, caption=paste("Source: Global Energy Monitor - July 2023")) +
+        plot_theme()
+      
+      
       return(g)
     })
     

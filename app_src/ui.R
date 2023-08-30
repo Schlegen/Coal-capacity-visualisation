@@ -9,7 +9,7 @@ fluidPage(
     # Sidebar with a slider input for number of bins
     sidebarLayout(
         sidebarPanel(
-          textInput("year", "Year of the visualisation?", value="1990")
+          textInput("year", "Enter the year of the visualisation :", value="1990")
           ),
 
         # Show a plot of the generated distribution
