@@ -37,19 +37,23 @@ plot_world_map <- function (observed_year) {
                                    | (PLANT_DATA$Status == 'retired' & PLANT_DATA$'Start year' <= observed_year & PLANT_DATA$'Retired year' >= observed_year),] %>%
     group_by(ISO3)%>% summarise(coal_capacity=sum(`Capacity (MW)`), .groups='drop')
   
+
+  
   #conversion of MW to GW
   year_capacity_data["coal_capacity"] <- (10 ** (-3)) * year_capacity_data["coal_capacity"]
-  year_capacity_data <- year_capacity_data[!is.na(year_capacity_data$ISO3), ]
-  
+
   # World map dataset for plots
   world_data <- WORLD_DATA
   world_data["coal_capacity"] <- year_capacity_data$coal_capacity[match(WORLD_DATA$"ISO3", year_capacity_data$"ISO3")]
+  # Replacing Missing values by 0, assessing the database is comprehensive
+  world_data[is.na(world_data$coal_capacity), "coal_capacity"] <- 0
+  
   
   #world map plot
   g <- ggplot() + 
     geom_polygon_interactive(data=world_data, color='gray70', size=0.1,
                              aes(x=long, y=lat, fill=coal_capacity, group=group,
-                                 tooltip = sprintf("%s<br/>%s", region, coal_capacity))) + 
+                                 tooltip = sprintf("%s<br/>%s GW", region, coal_capacity))) + 
     scale_fill_gradientn(colours = brewer.pal(5, "Reds"), na.value = 'gray80') + 
     scale_x_continuous(breaks = c()) +
     labs(fill="Coal Power Plant Capacity (GW)", color="Coal Power Plant Capacity (GW)", title=NULL, x=NULL, y=NULL, caption=paste("Source: Global Energy Monitor - July 2023")) +
