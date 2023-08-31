@@ -50,7 +50,7 @@ plot_world_map <- function (observed_year) {
     geom_polygon_interactive(data=world_data, color='gray70', size=0.1,
                              aes(x=long, y=lat, fill=coal_capacity, group=group,
                                  tooltip = sprintf("%s<br/>%s", region, coal_capacity))) + 
-    scale_fill_gradientn(colours = brewer.pal(5, "RdBu"), na.value = 'gray80') + 
+    scale_fill_gradientn(colours = brewer.pal(5, "Reds"), na.value = 'gray80') + 
     scale_x_continuous(breaks = c()) +
     labs(fill="Coal Power Plant Capacity (GW)", color="Coal Power Plant Capacity (GW)", title=NULL, x=NULL, y=NULL, caption=paste("Source: Global Energy Monitor - July 2023")) +
     coord_fixed() +
