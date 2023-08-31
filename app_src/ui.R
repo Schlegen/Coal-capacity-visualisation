@@ -1,5 +1,5 @@
 library(shiny)
-
+library(ggiraph)
 # Define UI for application
 fluidPage(
 
@@ -14,7 +14,7 @@ fluidPage(
 
         # Show a plot of the generated distribution
         mainPanel(
-          plotOutput("worldPlot"),
+          girafeOutput("worldPlot"),
           tableOutput("dataDisplay")
         )
     )
