@@ -36,7 +36,8 @@ WORLD_DATA$ISO3[WORLD_DATA$region == "Kosovo"] = "XXK"
 
 country_capacities <- function(observed_year) {
   year_capacity_data <- PLANT_DATA[(PLANT_DATA$Status == 'operating' & PLANT_DATA$'Start year' <= observed_year) 
-                                   | (PLANT_DATA$Status == 'retired' & PLANT_DATA$'Start year' <= observed_year & PLANT_DATA$'Retired year' >= observed_year),] %>%
+                                   | (PLANT_DATA$Status == 'retired' & PLANT_DATA$'Start year' <= observed_year & PLANT_DATA$'Retired year' >= observed_year)
+                                   | (PLANT_DATA$Status == 'mothballed' & PLANT_DATA$'Start year' <= observed_year),] %>%
     group_by(ISO3)%>% summarise(coal_capacity=sum(`Capacity (MW)`), .groups='drop')
   
   return(year_capacity_data)
