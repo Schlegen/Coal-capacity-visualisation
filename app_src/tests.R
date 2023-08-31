@@ -88,4 +88,26 @@ test_that("Test Slovenia 1972", {
   expect_equal(query_result, expected_value)
 })
 
+# CROATIA (for mothballed plants)
+
+test_that("Test Croatia 1960", {
+  country_ISO <- "HRV"
+  expected_value <- 0
+  year <- 1960
+  
+  query_result <- country_capacities(year)
+  query_result <- query_result$coal_capacity[query_result$ISO3 == country_ISO][1]
+  expect_equal(is.na(query_result), TRUE)
+})
+
+test_that("Test Croatia 2000", {
+  country_ISO <- "HRV"
+  expected_value <- 342
+  year <- 2000
+  
+  query_result <- country_capacities(year)
+  query_result <- query_result$coal_capacity[query_result$ISO3 == country_ISO][1]
+  expect_equal(query_result, expected_value)
+})
+
 
