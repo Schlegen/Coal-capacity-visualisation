@@ -13,11 +13,16 @@ library(countrycode)
 
 PLANT_DATA_PATH = "data/Global-Coal-Plant-Tracker-July-2023.xlsx"
 PLANT_DATA <- read_excel(PLANT_DATA_PATH, sheet="Units")
-PLANT_DATA["ISO3"] <- countrycode(PLANT_DATA$Country, origin = 'country.name', destination = 'iso3c') #read_excel(PLANT_DATA_PATH, sheet="Units")
+#setting ISO3 country codes efficiently
+unique_plant_data_countries <- unique(PLANT_DATA$Country)
+iso3_lookup <- countrycode(unique_plant_data_countries, origin = 'country.name', destination = 'iso3c')
+PLANT_DATA$ISO3 <- iso3_lookup[match(PLANT_DATA$Country, unique_plant_data_countries)]
 
 WORLD_DATA = ggplot2::map_data('world')
 WORLD_DATA <- fortify(WORLD_DATA)
-WORLD_DATA["ISO3"] <- countrycode(WORLD_DATA$region, origin = 'country.name', destination = 'iso3c') #ISO_CODES$ISO3[match(WORLD_DATA$region, ISO_CODES$Country)]
+unique_world_data_countries <- unique(WORLD_DATA$region)
+iso3_lookup <- countrycode(unique_world_data_countries, origin = 'country.name', destination = 'iso3c')
+WORLD_DATA$ISO3 <- iso3_lookup[match(WORLD_DATA$region, unique_world_data_countries)]
 
 plot_theme <- function () { 
   theme_bw() + theme(axis.text=element_text(size = 14),
@@ -40,11 +45,11 @@ plot_world_map <- function (observed_year) {
 
   
   #conversion of MW to GW
-  year_capacity_data["coal_capacity"] <- (10 ** (-3)) * year_capacity_data["coal_capacity"]
+  year_capacity_data$coal_capacity <- (10 ** (-3)) * year_capacity_data$coal_capacity
 
   # World map dataset for plots
   world_data <- WORLD_DATA
-  world_data["coal_capacity"] <- year_capacity_data$coal_capacity[match(WORLD_DATA$"ISO3", year_capacity_data$"ISO3")]
+  world_data["coal_capacity"] <- year_capacity_data$coal_capacity[match(WORLD_DATA$ISO3, year_capacity_data$ISO3)]
   # Replacing Missing values by 0, assessing the database is comprehensive
   world_data[is.na(world_data$coal_capacity), "coal_capacity"] <- 0
   
@@ -70,16 +75,23 @@ function(input, output, session) {
     
     output$dataDisplay <- renderTable({
       observed_year <- as.numeric(input$year)
+      
       #We first select the plants that operated during the year input$year and then sum them by country
       year_capacity_data <- PLANT_DATA[(PLANT_DATA$Status == 'operating' & PLANT_DATA$'Start year' <= observed_year) 
-                                       | (PLANT_DATA$Status == 'retired' & PLANT_DATA$'Start year' <= observed_year & PLANT_DATA$'Retired year' >= input$year),] %>%
-                    group_by(Country, ISO3)%>% summarise(coal_capacity=sum(`Capacity (MW)`), .groups='drop')
+                                       | (PLANT_DATA$Status == 'retired' & PLANT_DATA$'Start year' <= observed_year & PLANT_DATA$'Retired year' >= observed_year),] %>%
+        group_by(ISO3)%>% summarise(coal_capacity=sum(`Capacity (MW)`), .groups='drop')
+      
+      
+      
       #conversion of MW to GW
       year_capacity_data["coal_capacity"] <- (10 ** (-3)) * year_capacity_data["coal_capacity"]
-
-      #merging with ISO_CODES data frame to get the right format for plots
-      year_capacity_data <- year_capacity_data %>% select(ISO3, Country, coal_capacity)
       
-      year_capacity_data <- year_capacity_data[!is.na(year_capacity_data$ISO3), ]
+      # World map dataset for plots
+      world_data <- WORLD_DATA
+      world_data["coal_capacity"] <- year_capacity_data$coal_capacity[match(WORLD_DATA$"ISO3", year_capacity_data$"ISO3")]
+      # Replacing Missing values by 0, assessing the database is comprehensive
+      world_data[is.na(world_data$coal_capacity), "coal_capacity"] <- 0
+      
+      world_data %>% select(ISO3, region, coal_capacity) %>% unique()
     })
 }
