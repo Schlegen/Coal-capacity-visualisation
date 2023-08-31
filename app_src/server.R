@@ -45,6 +45,10 @@ country_capacities <- function(observed_year) {
 plot_theme <- function () { 
   theme_bw() + theme(axis.text=element_text(size = 14),
                      axis.title=element_text(size = 14),
+                     axis.ticks.y=element_blank(),
+                     axis.ticks.x=element_blank(),
+                     axis.text.y=element_blank(),
+                     axis.text.x=element_blank(),
                      strip.text=element_text(size = 14),
                      panel.grid.major=element_blank(), 
                      panel.grid.minor=element_blank(),
