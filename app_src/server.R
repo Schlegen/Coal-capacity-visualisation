@@ -31,8 +31,6 @@ plot_theme <- function () {
                      strip.background=element_rect(fill = 'white', colour = 'white'))
 }
 
-
-
 plot_world_map <- function (observed_year) {
   #We first select the plants that operated during the year input$year and then sum them by country
   year_capacity_data <- PLANT_DATA[(PLANT_DATA$Status == 'operating' & PLANT_DATA$'Start year' <= observed_year) 
@@ -55,12 +53,11 @@ plot_world_map <- function (observed_year) {
     scale_fill_gradientn(colours = brewer.pal(5, "RdBu"), na.value = 'gray80') + 
     scale_x_continuous(breaks = c()) +
     labs(fill="Coal Power Plant Capacity (GW)", color="Coal Power Plant Capacity (GW)", title=NULL, x=NULL, y=NULL, caption=paste("Source: Global Energy Monitor - July 2023")) +
+    coord_fixed() +
     plot_theme()
   
   return(g)
 }
-
-
 
 function(input, output, session) {
     output$worldPlot <- renderGirafe({
@@ -72,7 +69,7 @@ function(input, output, session) {
       #We first select the plants that operated during the year input$year and then sum them by country
       year_capacity_data <- PLANT_DATA[(PLANT_DATA$Status == 'operating' & PLANT_DATA$'Start year' <= observed_year) 
                                        | (PLANT_DATA$Status == 'retired' & PLANT_DATA$'Start year' <= observed_year & PLANT_DATA$'Retired year' >= input$year),] %>%
-        group_by(Country, ISO3)%>% summarise(coal_capacity=sum(`Capacity (MW)`), .groups='drop')
+                    group_by(Country, ISO3)%>% summarise(coal_capacity=sum(`Capacity (MW)`), .groups='drop')
       #conversion of MW to GW
       year_capacity_data["coal_capacity"] <- (10 ** (-3)) * year_capacity_data["coal_capacity"]
 
