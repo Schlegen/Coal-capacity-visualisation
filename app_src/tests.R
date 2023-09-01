@@ -1,4 +1,4 @@
-#library(testthat)
+library(testthat)
 
 setwd(box::file())
 source("server.R")
